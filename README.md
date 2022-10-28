@@ -101,7 +101,7 @@ Choosing the required statistical distribution and giving parameters of the dist
 ```python
 >>> mean_value = 0
 >>> variance_value = 1
->>> our_normal_distribution = beans.normal_distribution(mean_value, variance_value)
+>>> our_normal_distribution = bean.normal_distribution(mean_value, variance_value)
 
 ```
 
