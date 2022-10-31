@@ -234,12 +234,12 @@ class poisson_distribution(Distribution):
 
     def find_PDF(self,x):
         """
-        Finds the distributions probability density function at a given value of x
+        Finds the distributions probability density  at a given value of x
         """
         return self.mean ** x * sym.exp(-self.mean) / sym.factorial(x)
     def find_CDF(self,x):
         """
-        Finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density at a given value of x
         """
         k = sym.Symbol("k")
         return sym.exp(-self.mean) * sym.summation(((self.mean ** k ) / sym.factorial(k) ),(k,0,sym.floor(x)))
@@ -289,7 +289,7 @@ class continuous_uniform_distribution(Distribution):
         '''
     def find_PDF(self,x):
         """
-        Fnds the distributions probability density function at a given value of x
+        Finds the distributions probability density at a given value of x
         """
         if x < self.min:
             return 0
@@ -299,7 +299,7 @@ class continuous_uniform_distribution(Distribution):
             return 1 / (self.max - self.min)
     def find_CDF(self,x):
         """
-        Finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density at a given value of x
         """
         if x < self.min:
             return 0
@@ -346,7 +346,7 @@ class discrete_uniform_distribution(Distribution):
 
     def find_PDF(self,x, safe = False):
         """
-        Finds the distributions probability density function at a given value of x
+        Finds the distributions probability density at a given value of x
         """
         #These if conditions check if the value is a gap or a value
         if sym.floor(round(((x - self.min) / self.step),5)) == round(((x - self.min) / self.step),5) and not x < self.min and not x > self.max and safe:
@@ -357,7 +357,7 @@ class discrete_uniform_distribution(Distribution):
             return 0
     def find_CDF(self,x,safe = False):
         """
-        Finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density at a given value of x
         """
         if x < self.min:
             return 0
@@ -397,6 +397,10 @@ class discrete_uniform_distribution(Distribution):
         return self.min + (n - 1) * self.step #this fixes the -1 problem
 
 class binomial_distribution(Distribution):
+    '''
+    Gives the distribution all the common information. You can call any of these, apart from x of course.
+    Calling these attributes gives the value or a formula, depending on which you call
+    '''
     def __init__(self,n,p):
         self.IsDiscrete = True
         self.Piecewise = False
@@ -411,6 +415,9 @@ class binomial_distribution(Distribution):
         self.pdf = _choose(n,x) * (p ** x) * ((1 - p) ** (n - x))
 
     def find_PDF(self,x,safe = False):
+        """
+        Finds the distributions probability density at a given value of x
+        """
         if -1 < x and x < self.max + 1 and sym.floor(x) == x:
             result = _choose(self.max,x) * (self.probability ** x) * ((1 - self.probability) ** (self.max - x))
         else:
@@ -418,12 +425,18 @@ class binomial_distribution(Distribution):
         return result
 
     def find_CDF(self,x,safe = False):
+        """
+        Finds the distributions cumulative density at a given value of x
+        """
         total = 0
         for n in range(sym.ceiling(x + 1)):
             total += self.find_PDF(n)
         return total
 
     def find_quantile(self,x):
+        """
+        Finds the distributions quantile at a given value x
+        """
         found = False
         n = 0
         while found == False:
