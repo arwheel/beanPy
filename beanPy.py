@@ -395,6 +395,44 @@ class discrete_uniform_distribution(Distribution):
                 n = n + 1 #This is how many steps it is greater than, -1
 
         return self.min + (n - 1) * self.step #this fixes the -1 problem
+
+class binomial_distribution(Distribution):
+    def __init__(self,n,p):
+        self.IsDiscrete = True
+        self.Piecewise = False
+        self.mean = n * p
+        self.var = n * p * (1-p)
+        self.sd = sym.sqrt(self.var)
+        self.max = n
+        self.min = 0
+        self.probability = p
+        x = sym.Symbol("x")
+        k = sym.Symbol("k")
+        self.pdf = _choose(n,x) * (p ** x) * ((1 - p) ** (n - x))
+
+    def find_PDF(self,x,safe = False):
+        if -1 < x and x < self.max + 1 and sym.floor(x) == x:
+            result = _choose(self.max,x) * (self.probability ** x) * ((1 - self.probability) ** (self.max - x))
+        else:
+            result = 0
+        return result
+
+    def find_CDF(self,x,safe = False):
+        total = 0
+        for n in range(sym.ceiling(x + 1)):
+            total += self.find_PDF(n)
+        return total
+
+    def find_quantile(self,x):
+        found = False
+        n = 0
+        while found == False:
+            if x < self.find_CDF(n):
+                found = True
+            else:
+                n += 1
+        return n
+
             
 
 
@@ -402,3 +440,12 @@ class discrete_uniform_distribution(Distribution):
 
 rng_unseeded = np.random.default_rng()
 rng_seeded = np.random.default_rng()
+
+def _choose(n,k):
+    '''
+    This is here just because I coudn't find a nice to use function on sympy or numpy
+    '''
+    #if k > n:      This is technically needed for the choose function, but nobody will be using this function because it is locked behing distributions
+    #    return 0
+    result = sym.factorial(n) / (sym.factorial(k) * sym.factorial(n - k))
+    return result
