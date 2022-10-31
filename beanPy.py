@@ -24,7 +24,7 @@ class Distribution():
 
     def take_multiple_samples(self, num, seed=None):
         '''
-        This takes a sample of given size and optional seed.
+        Takes a sample of given size and optional seed.
         '''
         result = [] #Creates a list to be used later
         if seed is None:
@@ -142,7 +142,7 @@ class Distribution():
 class normal_distribution(Distribution):
     def __init__(self,mean,var):
         '''
-        This gives the distribution all the common information. You can call any of these, apart from x of course.
+        Gives the distribution all the common information. You can call any of these, apart from x of course.
         Calling these attributes gives the value or a formula, depending on which you call
         '''
         self.IsDiscrete = False
@@ -157,17 +157,17 @@ class normal_distribution(Distribution):
         
     def find_PDF(self,x):
         """
-        This finds the distributions probability density function at a given value of x
+        Finds the distributions probability density function at a given value of x
         """
         return (1 / (self.sd * sym.sqrt(2 * sym.pi))) * sym.exp(-(1 / 2) * ((x - self.mean) / self.sd) ** 2)
     def find_CDF(self, x):
         """
-        This finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density function at a given value of x
         """
         return ((1 / 2) + (1 / 2) * sym.erf((x - self.mean) / (self.sd * sym.sqrt(2))))
     def find_quantile(self,p):
         """
-        This finds the distributions quantile at a given value x
+        Finds the distributions quantile at a given value x
         """
         if p < 0 or p > 1:
             print("Invalid number inputted into the Normal Distribution Quantile Function. This will now return the value 1. The number inputted to the Normal Distribution Quantile Function was: " + str(p))
@@ -178,7 +178,7 @@ class normal_distribution(Distribution):
 class exponential_distribution(Distribution):
     def __init__(self,l):
         '''
-        This gives the distribution all the common information. You can call any of these, apart from x of course.
+        Gives the distribution all the common information. You can call any of these, apart from x of course.
         Calling these attributes gives the value or a formula, depending on which you call
         '''
         self.IsDiscrete = False
@@ -197,17 +197,17 @@ class exponential_distribution(Distribution):
         '''
     def find_PDF(self,x):
         """
-        This finds the distributions probability density function at a given value of x
+        Finds the distributions probability density function at a given value of x
         """
         return (1/self.mean) * sym.exp(- (1/self.mean) * x)
     def find_CDF(self, x):
         """
-        This finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density function at a given value of x
         """
         return (1 - sym.exp(- 1/self.mean * x))
     def find_quantile(self,p):
         """
-        This finds the distributions quantile at a given value x
+        Finds the distributions quantile at a given value x
         """
         if p < 0 or p > 1:
             print("Invalid number inputted into the Exponential Distribution Quantile Function. This will now return the value 1. The number inputted to the Exponential Distribution Quantile Function was: " + str(p))
@@ -219,7 +219,7 @@ class exponential_distribution(Distribution):
 class poisson_distribution(Distribution):
     def __init__(self,l):
         '''
-        This gives the distribution all the common information. You can call any of these, apart from x of course.
+        Gives the distribution all the common information. You can call any of these, apart from x of course.
         Calling these attributes gives the value or a formula, depending on which you call
         '''
         self.IsDiscrete = True
@@ -234,18 +234,18 @@ class poisson_distribution(Distribution):
 
     def find_PDF(self,x):
         """
-        This finds the distributions probability density function at a given value of x
+        Finds the distributions probability density function at a given value of x
         """
         return self.mean ** x * sym.exp(-self.mean) / sym.factorial(x)
     def find_CDF(self,x):
         """
-        This finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density function at a given value of x
         """
         k = sym.Symbol("k")
         return sym.exp(-self.mean) * sym.summation(((self.mean ** k ) / sym.factorial(k) ),(k,0,sym.floor(x)))
     def find_quantile(self,p):
         """
-        This finds the distributions quantile at a given value x
+        Finds the distributions quantile at a given value x
         """
         Found = False
         n = 0
@@ -253,7 +253,7 @@ class poisson_distribution(Distribution):
             print("Invalid number inputted into the Poisson Distribution Quantile Function. This will now return the value 1. The number inputted to the Poisson Distribution Quantile Function was: " + str(p))
             return 1
         '''
-        This is for discrete and piecewise distributions only. It checks if the given is less than the cdf for n starting 
+        For discrete and piecewise distributions only. It checks if the given is less than the cdf for n starting 
         from 0 until the end is found. If the given value is 1, this will go on forever.
         '''
         while Found == False:
@@ -268,7 +268,7 @@ class poisson_distribution(Distribution):
 class continuous_uniform_distribution(Distribution):
     def __init__(self,a,b):
         '''
-        This gives the distribution all the common information. You can call any of these, apart from x of course.
+        Gives the distribution all the common information. You can call any of these, apart from x of course.
         Calling these attributes gives the value or a formula, depending on which you call
         '''
         if not b > a:
@@ -289,7 +289,7 @@ class continuous_uniform_distribution(Distribution):
         '''
     def find_PDF(self,x):
         """
-        This finds the distributions probability density function at a given value of x
+        Fnds the distributions probability density function at a given value of x
         """
         if x < self.min:
             return 0
@@ -299,7 +299,7 @@ class continuous_uniform_distribution(Distribution):
             return 1 / (self.max - self.min)
     def find_CDF(self,x):
         """
-        This finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density function at a given value of x
         """
         if x < self.min:
             return 0
@@ -309,7 +309,7 @@ class continuous_uniform_distribution(Distribution):
             return (x - self.min) / (self.max - self.min)
     def find_quantile(self,p):
         """
-        This finds the distributions quantile at a given value x
+        Finds the distributions quantile at a given value x
         """
         if p < 0 or p > 1:
             print("Invalid number inputted into the Continuous Uniform Distribution Quantile Function. This will now return the value 1. The number inputted to the Exponential Distribution Quantile Function was: " + str(p))
@@ -324,7 +324,7 @@ class continuous_uniform_distribution(Distribution):
 class discrete_uniform_distribution(Distribution):
     def __init__(self,min,max,step = 1):
         '''
-        This gives the distribution all the common information. You can call any of these, apart from x of course.
+        Gives the distribution all the common information. You can call any of these, apart from x of course.
         Calling these attributes gives the value or a formula, depending on which you call
         '''
         if not max > min:
@@ -346,7 +346,7 @@ class discrete_uniform_distribution(Distribution):
 
     def find_PDF(self,x, safe = False):
         """
-        This finds the distributions probability density function at a given value of x
+        Finds the distributions probability density function at a given value of x
         """
         #These if conditions check if the value is a gap or a value
         if sym.floor(round(((x - self.min) / self.step),5)) == round(((x - self.min) / self.step),5) and not x < self.min and not x > self.max and safe:
@@ -357,7 +357,7 @@ class discrete_uniform_distribution(Distribution):
             return 0
     def find_CDF(self,x,safe = False):
         """
-        This finds the distributions cumulative density function at a given value of x
+        Finds the distributions cumulative density function at a given value of x
         """
         if x < self.min:
             return 0
@@ -377,7 +377,7 @@ class discrete_uniform_distribution(Distribution):
             
     def find_quantile(self,p):
         """
-        This finds the distributions quantile at a given value x
+        Finds the distributions quantile at a given value x
         """
         Found = False
         n = 0
@@ -385,7 +385,7 @@ class discrete_uniform_distribution(Distribution):
             print("Invalid number inputted into the Discrete Uniform Distribution Quantile Function. This will now return the value 1. The number inputted to the Poisson Distribution Quantile Function was: " + str(p))
             return 1
         '''
-        This is for discrete and piecewise distributions only. It checks if the given is less than the cdf for n starting 
+        For discrete and piecewise distributions only. It checks if the given is less than the cdf for n starting 
         from 0 until the end is found. If the given value is 1, this will go on forever.
         '''
         while Found == False:
