@@ -1,3 +1,7 @@
+'''
+This is the main and only current module for beanPy
+'''
+
 import numpy as np
 import sympy as sym
 import matplotlib.pyplot as plt
