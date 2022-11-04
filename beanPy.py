@@ -3,7 +3,9 @@ import sympy as sym
 import matplotlib.pyplot as plt
 
 class Distribution():
-    # This is the generic class that all distributions will inherit from
+    '''
+    Generic class that all distributions will inherit from
+    '''
     def take_sample(self, seed=None):
         '''
         Takes a single sample from a population which follows the given distribution.
