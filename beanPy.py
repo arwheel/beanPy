@@ -2,7 +2,7 @@
 This is the main and only current module for beanPy
 '''
 
-__version__ = 1.0
+__version__ = "0.1.0"
 
 import numpy as np
 import sympy as sym
