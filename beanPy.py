@@ -508,6 +508,10 @@ class joint_distribution():
         plt.colorbar()
         plt.show()
 
+    def take_sample(self):
+        return self.x_dist.take_sample(), self.y_dist.take_sample()
+
+
 
 
     
