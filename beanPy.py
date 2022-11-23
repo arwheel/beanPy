@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+from math import gamma
+from scipy.special import gammainc
 
 class Distribution():
     # This is the generic class that all distributions will inherit from
@@ -13,14 +15,17 @@ class Distribution():
         Takes a single sample from a population which follows the given distribution.
         The sample follows a given seed. If no seed is given, it will generate a random seed
         '''
-        if seed is None:
-            y = rng_unseeded.random() #Random number in (0,1) using the rng created at the start
-        else:
-            rng_seeded = np.random.default_rng(seed) #Sets a new seed
-            y = rng_seeded.random() #Random number in (0,1) using the seed
-            
+        if self.HasQuantile: #If the function has a defined quantile in beanPy
+            if seed is None:
+                y = rng_unseeded.random() #Random number in (0,1) using the rng created at the start
+            else:
+                rng_seeded = np.random.default_rng(seed) #Sets a new seed
+                y = rng_seeded.random() #Random number in (0,1) using the seed
+            sample = self.find_quantile(y) #Applies that random number to the Quantile function
 
-        sample = self.find_quantile(y) #Applies that random number to the Quantile function
+        else: #If the function takes samples in a different way, such as chi squared
+            sample = self._find_sample()
+    
         if self.IsDiscrete:
             return(sample)
         
@@ -66,11 +71,20 @@ class Distribution():
         x_plot = []
         if not self.IsDiscrete:
             if not self.Piecewise:
-                for i in range(n):
-                    y = (i+1)/(n+1) # to ensure an even spread, this will be the y co-ordinate on the graph
-                    sample = self.find_quantile(y) #Applies the Quantile function to y, giving the x co-ordinate
-                    y_plot.append(y)
-                    x_plot.append(sample)
+                if self.HasQuantile:
+                    for i in range(n):
+                        y = (i+1)/(n+1) # to ensure an even spread, this will be the y co-ordinate on the graph
+                        sample = self.find_quantile(y) #Applies the Quantile function to y, giving the x co-ordinate
+                        y_plot.append(y)
+                        x_plot.append(sample)
+                else: #No Quantile - This method is potentially very slow
+                    for i in range(n):
+                        x = self.take_sample()
+                        x_plot.append(x)
+                    x_plot.sort()
+                    for i in range(n):
+                        y = self.find_CDF(x_plot[i])
+                        y_plot.append(y)
             else:
                 for i in range(n + 1):
                     y = i / n
@@ -108,12 +122,21 @@ class Distribution():
         x_plot = []
         if not self.IsDiscrete:
             if not self.Piecewise:
-                for i in range(n):
-                    a = (i+1)/(n+1) # this ensures an even spread
-                    x = self.find_quantile(a) #finds the x co-ordinate like in CDF
-                    y = self.find_PDF(x) #finds the y co-ordinate
-                    y_plot.append(y)
-                    x_plot.append(x)
+                if self.HasQuantile:
+                    for i in range(n):
+                        a = (i+1)/(n+1) # this ensures an even spread
+                        x = self.find_quantile(a) #finds the x co-ordinate like in CDF
+                        y = self.find_PDF(x) #finds the y co-ordinate
+                        y_plot.append(y)
+                        x_plot.append(x)
+                else: #No Quantile - This method is potentially very slow
+                    for i in range(n):
+                        x = self.take_sample()
+                        x_plot.append(x)
+                    x_plot.sort()
+                    for i in range(n):
+                        y = self.find_PDF(x_plot[i])
+                        y_plot.append(y)
             else:
                 for i in range(n + 1):
                     a = (i) * (self.max - self.min) / (n) + self.min
@@ -167,6 +190,7 @@ class normal_distribution(Distribution):
         '''
         self.IsDiscrete = False
         self.Piecewise = False
+        self.HasQuantile = True
         self.min = -np.inf
         self.max = np.inf
         self.mean = mean
@@ -205,6 +229,7 @@ class exponential_distribution(Distribution):
         '''
         self.IsDiscrete = False
         self.Piecewise = False
+        self.HasQuantile = True
         self.min = 0
         self.max = np.inf
         self.mean = 1 / l
@@ -252,6 +277,7 @@ class poisson_distribution(Distribution):
         '''
         self.IsDiscrete = True
         self.Piecewise = False
+        self.HasQuantile = True
         self.min = 0
         self.max = np.inf
         self.mean = l
@@ -310,6 +336,7 @@ class continuous_uniform_distribution(Distribution):
         else:
             self.IsDiscrete = False
             self.Piecewise = True
+            self.HasQuantile = True
             self.mean = (a + b) / 2
             self.var = (b - a) / 12
             self.sd = sym.sqrt(self.var)
@@ -366,6 +393,7 @@ class discrete_uniform_distribution(Distribution):
         
         self.IsDiscrete = True
         self.Piecewise = True
+        self.HasQuantile = True
         self.NumOfSteps = int((max - min) / step) + 1
         self.mean = (max + min) / 2
         self.var = ((self.NumOfSteps) ** 2 - 1) / 12
@@ -434,6 +462,7 @@ class binomial_distribution(Distribution):
     def __init__(self,n,p):
         self.IsDiscrete = True
         self.Piecewise = False
+        self.HasQuantile = True
         self.mean = n * p
         self.var = n * p * (1-p)
         self.sd = sym.sqrt(self.var)
@@ -468,6 +497,45 @@ class binomial_distribution(Distribution):
             else:
                 n += 1
         return n
+
+class chi_squared_distribution(Distribution):
+    def __init__(self,k):
+        if not sym.floor(k) == k or k<1:
+            print("Error: You did not enter a natural number for the degrees of freedom")
+        else:
+            self.IsDiscrete = False
+            self.Piecewise = False
+            self.HasQuantile = False
+            self.mean = k
+            self.var = 2 * k
+            self.sd = sym.sqrt(self.var)
+            self.max = np.inf
+            self.min = 0
+            self.dof = k
+            x = sym.Symbol("x")
+            t = sym.Symbol("t")
+            self.pdf = x**(k/2 - 1) * sym.exp(-x/2)/(gamma(k/2)* 2 ** (k/2))
+            self.cdf = sym.integrate((t) ** (k/2 - 1) * sym.exp(-t),(t,0,x/2)) / gamma(k/2)
+
+    def find_PDF(self,x):
+        z = x ** (self.dof/2 - 1) * np.e ** (-x/2)/(gamma(self.dof/2) * 2 ** (self.dof/2))
+        return z
+
+    def find_CDF(self,x):
+        z = gammainc(self.dof/2, x/2) / gamma(self.dof/2)
+        return z
+
+    def _find_sample(self):
+        standard_normal = normal_distribution(0,1)
+        result = 0
+        for n in range(self.dof):
+            z = standard_normal.take_sample()
+            z = z ** 2
+            result += z
+        return result
+
+    #There is no find quantile function as it is too difficult
+
 
 class joint_distribution():
     def __init__(self,d1,d2):
